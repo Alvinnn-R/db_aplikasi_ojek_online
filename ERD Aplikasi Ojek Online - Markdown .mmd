@@ -1,0 +1,114 @@
+erDiagram
+
+    %% ========== USERS ==========
+    users {
+        BIGSERIAL id PK
+        VARCHAR name
+        VARCHAR role
+        VARCHAR email
+        VARCHAR phone
+        TEXT password_hash
+        TIMESTAMPTZ created_at
+        TIMESTAMPTZ updated_at
+    }
+
+    %% ========== CUSTOMERS ==========
+    customers {
+        BIGSERIAL id PK
+        BIGINT user_id FK
+        TEXT profile_photo
+        NUMERIC rating
+        INTEGER total_orders
+    }
+
+    %% ========== DRIVERS ==========
+    drivers {
+        BIGSERIAL id PK
+        BIGINT user_id FK
+        TEXT profile_photo
+        VARCHAR vehicle_type
+        VARCHAR vehicle_model
+        VARCHAR license_plate
+        VARCHAR driver_status
+        NUMERIC rating
+        INTEGER monthly_completed_count
+    }
+
+    %% ========== AREAS ==========
+    areas {
+        BIGSERIAL id PK
+        VARCHAR name
+        VARCHAR city
+        NUMERIC latitude
+        NUMERIC longitude
+    }
+
+    %% ========== ORDERS ==========
+    orders {
+        BIGSERIAL id PK
+        UUID order_uuid
+        BIGINT customer_id FK
+        BIGINT driver_id FK
+        BIGINT pickup_area_id FK
+        BIGINT dropoff_area_id FK
+        TEXT pickup_address
+        TEXT dropoff_address
+        NUMERIC total_cost
+        VARCHAR status
+        TIMESTAMPTZ requested_at
+        TIMESTAMPTZ accepted_at
+        TIMESTAMPTZ started_at
+        TIMESTAMPTZ completed_at
+        TIMESTAMPTZ canceled_at
+        NUMERIC rating
+    }
+
+    %% ========== ORDER STATUS HISTORY ==========
+    order_status_history {
+        BIGSERIAL id PK
+        BIGINT order_id FK
+        VARCHAR status
+        BIGINT changed_by_user_id FK
+        TEXT note
+        TIMESTAMPTZ changed_at
+    }
+
+    %% ========== USER SESSIONS ==========
+    user_sessions {
+        BIGSERIAL id PK
+        BIGINT user_id FK
+        UUID session_token
+        TEXT device_info
+        INET ip_address
+        TIMESTAMPTZ login_at
+        TIMESTAMPTZ last_activity_at
+        TIMESTAMPTZ logout_at
+    }
+
+    %% ========== DRIVER MONTHLY STATS ==========
+    driver_monthly_stats {
+        BIGSERIAL id PK
+        BIGINT driver_id FK
+        INTEGER year
+        INTEGER month
+        INTEGER total_earning
+        INTEGER total_orders 
+    }
+
+    %% ========== RELATIONSHIPS ==========
+
+    users ||--|| customers : "1-to-1"
+    users ||--|| drivers : "1-to-1"
+    users ||--o{ user_sessions : "login sessions"
+    users ||--o{ order_status_history : "status changed by user"
+
+    customers ||--o{ orders : "customer creates"
+
+    drivers ||--o{ orders : "driver handles"
+
+    areas ||--o{ orders : "pickup_area"
+    areas ||--o{ orders : "dropoff_area"
+
+    orders ||--o{ order_status_history : "has history"
+
+    drivers ||--o{ driver_monthly_stats : "monthly stats"
